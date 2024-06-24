@@ -1,0 +1,1 @@
+.dc-tabs__header{gap:var(--dc-tab-name-gap);margin-bottom:calc(var(--dc-tab-header-content-gap)/2)}@media screen and (min-width: 1024px){.dc-tabs__header{margin-bottom:var(--dc-tab-header-content-gap)}}.dc-tabs__content{color:var(--dc-tab-content-color)}.dc-tabs__content a{color:var(--dc-tab-content-link-color)}

@@ -1,0 +1,12 @@
+{%- assign section_id = section.id | append: '-' | append: product.id -%}
+
+{% render 'card-product',
+	card_product: product,
+	media_aspect_ratio: settings.recent_view_image_ratio,
+	image_shape: settings.recent_view_image_shape,
+	show_secondary_image: settings.recent_view_show_secondary_image,
+	show_vendor: settings.recent_view_show_vendor,
+	show_rating: settings.recent_view_show_rating,
+	section_id: section_id,
+	quick_add: settings.recent_view_quick_add
+%}

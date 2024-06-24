@@ -1,0 +1,106 @@
+{{ 'dc-section-featured-3-banners.css' | asset_url | stylesheet_tag }}
+
+<div class="featured-2-banners page-width color-{{ section.settings.color_scheme }} gradient">
+	<div class="featured-2-banners__grid grid items-center">
+		{% for block in section.blocks %}
+			<div class="grid__item featured-2-banners__grid-item featured-2-banners__grid-item--{{ forloop.index }}">
+				{%- case block.type -%}
+					{%- when 'content' -%}
+						<h2
+							class="featured-2-banners__heading inline-richtext"
+						>
+							{{ block.settings.title }}
+						</h2>
+						<div class="featured-2-banners__text ">
+							{{ block.settings.richtext }}
+						</div>
+						{%- if block.settings.button_label != blank -%}
+							<a
+								{% if block.settings.button_link == blank %}
+									role="link" aria-disabled="true"
+								{% else %}
+									href="{{ block.settings.button_link }}"
+								{% endif %}
+								class="button button--primary"
+							>
+								{{ block.settings.button_label | escape }}
+							</a>
+						{%- endif -%}
+					{%- when 'image' -%}
+						{%- if block.settings.image != blank -%}
+							{%- assign widths = '165, 360, 535, 750, 1070, 1500' -%}
+							{%- capture sizes -%}
+                (min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | divided_by: 2 }}px,
+                (min-width: 750px) calc((100vw - 130px) / 2), calc((100vw - 50px) / 2)
+              {%- endcapture -%}
+							{{
+								block.settings.image
+								| image_url: width: 1500
+								| image_tag: sizes: sizes, widths: widths, fetchpriority: 'auto'
+							}}
+						{%- endif -%}
+				{%- endcase -%}
+			</div>
+		{% endfor %}
+	</div>
+</div>
+
+{% schema %}
+{
+	"name": "Featured 2 banners",
+	"settings": [
+		{
+			"type": "color_scheme",
+			"id": "color_scheme",
+			"label": "t:sections.all.colors.label",
+			"default": "scheme-1"
+		}
+	],
+	"blocks": [
+		{
+			"name": "Content",
+			"type": "content",
+			"settings": [
+				{
+					"type": "text",
+					"id": "title",
+					"label": "Title",
+					"default": "Bridal Jewelry Collection"
+				},
+				{
+					"type": "richtext",
+					"id": "richtext",
+					"label": "Richtext"
+				},
+				{
+					"type": "text",
+					"id": "button_label",
+					"label": "Button Label",
+					"default": "Shop Now"
+				},
+				{
+					"type": "url",
+					"id": "button_link",
+					"label": "Button Url"
+				}
+			]
+		},
+		{
+			"name": "Image",
+			"type": "image",
+			"settings": [
+				{
+					"type": "image_picker",
+					"id": "image",
+					"label": "Image"
+				}
+			]
+		}
+	],
+	"presets": [
+		{
+			"name": "Featured 2 banners"
+		}
+	]
+}
+{% endschema %}

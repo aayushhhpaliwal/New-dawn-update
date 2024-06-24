@@ -1,0 +1,423 @@
+{{ 'dc-section-customer-reviews.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+	.section-{{ section.id }}-padding {
+	  --d-verify-color: {{ section.settings.verify_color }};
+	  --d-author-thumbnail-width: {{ section.settings.thumbnail_width }}px;
+	  --d-review-card: {{ section.settings.review_card }};
+	  padding-top: calc({{ section.settings.padding_top }}px * 0.75);
+	  padding-bottom: calc({{ section.settings.padding_bottom }}px * 0.75);
+	}
+
+	@media screen and (min-width: 750px) {
+	  .section-{{ section.id }}-padding {
+	    padding-top: {{ section.settings.padding_top }}px;
+	    padding-bottom: {{ section.settings.padding_bottom }}px;
+	  }
+	}
+{%- endstyle -%}
+
+{% liquid
+	assign top_images_block = section.blocks | where: 'type', 'top_images' | first
+	assign review_blocks = section.blocks | where: 'type', 'review'
+%}
+
+<section-customer-reviews
+	class="customer-reviews color-{{ section.settings.color_scheme }} gradient"
+	id="{{ section.id }}"
+>
+	<div class="section-{{ section.id }}-padding page-width">
+		{%- if section.settings.heading != blank or section.settings.text != blank -%}
+			<div class="customer-reviews__header page-width page-width--narrow center">
+				{%- if top_images_block != blank -%}
+					{%- for index in (1..10) -%}
+						{% liquid
+							assign image_setting = 'image_' | append: index
+							assign image = top_images_block.settings[image_setting]
+						%}
+						{%- if image != blank -%}
+							<img
+								srcset="
+									{%- if image.width >= 165 -%}{{ image | image_url: width: 165 }} 165w,{%- endif -%}
+									{%- if image.width >= 360 -%}{{ image | image_url: width: 360 }} 360w,{%- endif -%}
+									{%- if image.width >= 533 -%}{{ image | image_url: width: 533 }} 533w,{%- endif -%}
+									{%- if image.width >= 720 -%}{{ image | image_url: width: 720 }} 720w,{%- endif -%}
+									{%- if image.width >= 940 -%}{{ image | image_url: width: 940 }} 940w,{%- endif -%}
+									{%- if image.width >= 1066 -%}{{ image | image_url: width: 1066 }} 1066w,{%- endif -%}
+									{{ image | image_url }} {{ image.width }}w
+								"
+								src="{{ image | image_url: width: 100 }}"
+								sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+								alt="{{ image.alt | escape }}"
+								class="motion-reduce customer-reviews__header-icon"
+								loading="lazy"
+								width="{{ image.width }}"
+								height="{{ image.height }}"
+							>
+						{%- endif -%}
+					{%- endfor -%}
+				{%- endif -%}
+				{%- if section.settings.heading != blank -%}
+					<h2
+						class="rich-text__heading rte inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+						{% if settings.animations_reveal_on_scroll %}
+							data-cascade
+							style="--animation-order: 1;"
+						{% endif %}
+					>
+						{{ section.settings.heading }}
+					</h2>
+				{%- endif -%}
+
+				{%- if section.settings.text != blank -%}
+					<div
+						class="rich-text__text rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+						{% if settings.animations_reveal_on_scroll %}
+							data-cascade
+							style="--animation-order: 2;"
+						{% endif %}
+					>
+						{{ section.settings.text }}
+					</div>
+				{%- endif -%}
+			</div>
+		{%- endif -%}
+
+		{%- if review_blocks.size > 0 -%}
+			<div class="customer-reviews__list{% if section.settings.enable_carousel %} js-carousel{% else %} grid grid--{{ section.settings.columns_mobile }}-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop{% endif %}">
+				{%- for block in review_blocks -%}
+					<div
+						class="customer-reviews__item{% if section.settings.enable_carousel %} customer-reviews__item--carousel{% else %} grid__item{% endif %}"
+						{{ block.shopify_attributes }}
+					>
+						<div class="customer-reviews__item-header">
+							<div class="customer-reviews__item-name h3">
+								{%- if block.settings.author_thumbnail != blank -%}
+									<div class="customer-reviews__item-thumbnail">
+										{{
+											block.settings.author_thumbnail
+											| image_url: width: 80
+											| image_tag: sizes: '50, 75, 100, 150, 200'
+										}}
+									</div>
+								{%- endif -%}
+								<span class="h3">{{ block.settings.name }}</span>
+							</div>
+
+							{%- if section.settings.verified_text -%}
+								<span class="customer-reviews__item-verify">
+									<svg
+										width="16"
+										height="16"
+										viewBox="0 0 16 16"
+										fill="none"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<path d="M9.47509 1.08176C9.79704 1.99289 10.8369 2.42109 11.7062 2.00577C13.0906 1.34898 14.533 2.79133 13.8762 4.17573C13.4609 5.04822 13.8923 6.08492 14.8002 6.40687C16.2425 6.91878 16.2425 8.95996 14.8002 9.47509C13.8923 9.79704 13.4609 10.8369 13.8762 11.7062C14.533 13.0906 13.0906 14.533 11.7062 13.8762C10.8337 13.4609 9.79704 13.8923 9.47509 14.8002C8.96318 16.2425 6.922 16.2425 6.40687 14.8002C6.08492 13.8923 5.04501 13.4609 4.17573 13.8762C2.79134 14.533 1.34899 13.0906 2.00577 11.7062C2.42109 10.8337 1.98967 9.79704 1.08176 9.47509C-0.360588 8.96318 -0.360588 6.922 1.08176 6.40687C1.98967 6.08492 2.42109 5.045 2.00577 4.17573C1.34899 2.79133 2.79134 1.34898 4.17573 2.00577C5.04823 2.42109 6.08492 1.98967 6.40687 1.08176C6.922 -0.360588 8.96318 -0.360588 9.47509 1.08176Z" fill="var(--d-verify-color)" />
+										<path d="M6.85756 8.55448C7.48537 8.05223 8.1003 7.55643 8.71845 7.06062C9.42997 6.48754 10.1383 5.91124 10.8562 5.34782C11.4229 4.90353 12.1891 5.19651 12.3243 5.90481C12.3952 6.27183 12.2535 6.55837 11.9702 6.78696C10.8594 7.68521 9.75192 8.58345 8.64118 9.47848C8.22586 9.81653 7.81055 10.1546 7.39201 10.4862C6.90586 10.8758 6.40361 10.8339 5.99473 10.3671C5.2639 9.53644 4.53628 8.70257 3.80867 7.86871C3.43842 7.44374 3.46418 6.85134 3.8634 6.51007C4.25296 6.17846 4.82926 6.24285 5.19951 6.66461C5.75005 7.2892 6.29737 7.91701 6.85756 8.55448Z" fill="#FDFEFD" />
+									</svg>
+									{{ section.settings.verified_text }}
+								</span>
+							{%- endif -%}
+
+							<span class="customer-reviews__item-rating">
+								{% for index in (1..5) %}
+									<svg
+										width="27"
+										height="29"
+										viewBox="0 0 27 29"
+										fill="none"
+										xmlns="http://www.w3.org/2000/svg"
+									>
+										<path d="M5.07323 28.6514L7.22853 18.3839L0 11.4781L9.54961 10.5646L13.2634 0.881836L16.9771 10.5646L26.5267 11.4781L19.2982 18.3839L21.4535 28.6514L13.2634 23.2071L5.07323 28.6514Z" fill="#FFAB26" />
+									</svg>
+								{% endfor %}
+							</span>
+						</div>
+
+						<div class="customer-reviews__item-content rte">
+							{{ block.settings.content }}
+						</div>
+					</div>
+				{%- endfor -%}
+			</div>
+		{%- endif -%}
+	</div>
+</section-customer-reviews>
+
+<script src="{{ 'section-customer-reviews.js' |  asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+	"name": "Customer reviews",
+	"tag": "section",
+	"class": "section",
+	"settings": [
+		{
+			"type": "header",
+			"content": "Header"
+		},
+		{
+			"type": "inline_richtext",
+			"id": "heading",
+			"default": "WHAT OUR CUSTOMERS SAY ABOUT US",
+			"label": "t:sections.rich-text.blocks.heading.settings.heading.label"
+		},
+		{
+			"type": "select",
+			"id": "heading_size",
+			"options": [
+				{
+					"value": "h2",
+					"label": "t:sections.all.heading_size.options__1.label"
+				},
+				{
+					"value": "h1",
+					"label": "t:sections.all.heading_size.options__2.label"
+				},
+				{
+					"value": "h0",
+					"label": "t:sections.all.heading_size.options__3.label"
+				},
+				{
+					"value": "hxl",
+					"label": "t:sections.all.heading_size.options__4.label"
+				}
+			],
+			"default": "h1",
+			"label": "t:sections.all.heading_size.label"
+		},
+		{
+			"type": "richtext",
+			"id": "text",
+			"default": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>",
+			"label": "t:sections.rich-text.blocks.text.settings.text.label"
+		},
+		{
+			"type": "header",
+			"content": "Review card"
+		},
+		{
+			"type": "range",
+			"id": "thumbnail_width",
+			"label": "Author thumbnail width",
+			"min": 30,
+			"max": 80,
+			"step": 2,
+			"unit": "px",
+			"default": 30
+		},
+		{
+			"type": "text",
+			"id": "verified_text",
+			"label": "Verified Text",
+			"default": "Verified customer"
+		},
+		{
+			"type": "color",
+			"id": "review_card",
+			"label": "Review card",
+			"default": "#f8f8f8"
+		},
+		{
+			"type": "color",
+			"id": "verify_color",
+			"label": "Verify color",
+			"default": "#72bf71"
+		},
+		{
+			"type": "header",
+			"content": "Layout"
+		},
+		{
+			"type": "checkbox",
+			"id": "enable_carousel",
+			"label": "Enable carousel",
+			"default": true
+		},
+		{
+			"type": "range",
+			"id": "columns_desktop",
+			"min": 1,
+			"max": 4,
+			"step": 1,
+			"default": 3,
+			"label": "t:sections.multicolumn.settings.columns_desktop.label"
+		},
+		{
+			"type": "select",
+			"id": "columns_mobile",
+			"options": [
+				{
+					"value": "1",
+					"label": "t:sections.multicolumn.settings.columns_mobile.options__1.label"
+				},
+				{
+					"value": "2",
+					"label": "t:sections.multicolumn.settings.columns_mobile.options__2.label"
+				}
+			],
+			"default": "1",
+			"label": "t:sections.multicolumn.settings.columns_mobile.label"
+		},
+		{
+			"type": "header",
+			"content": "Colors"
+		},
+		{
+			"type": "color_scheme",
+			"id": "color_scheme",
+			"label": "t:sections.all.colors.label",
+			"default": "background-1"
+		},
+		{
+			"type": "header",
+			"content": "t:sections.all.padding.section_padding_heading"
+		},
+		{
+			"type": "range",
+			"id": "padding_top",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_top",
+			"default": 40
+		},
+		{
+			"type": "range",
+			"id": "padding_bottom",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_bottom",
+			"default": 52
+		}
+	],
+	"blocks": [
+		{
+			"type": "top_images",
+			"name": "Header thumbnails",
+			"settings": [
+				{
+					"type": "image_picker",
+					"id": "image_1",
+					"label": "Thumbnail 1"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_2",
+					"label": "Thumbnail 2"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_3",
+					"label": "Thumbnail 3"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_4",
+					"label": "Thumbnail 4"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_5",
+					"label": "Thumbnail 5"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_6",
+					"label": "Thumbnail 6"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_7",
+					"label": "Thumbnail 7"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_8",
+					"label": "Thumbnail 8"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_9",
+					"label": "Thumbnail 9"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_10",
+					"label": "Thumbnail 10"
+				}
+			]
+		},
+		{
+			"type": "review",
+			"name": "Review",
+			"settings": [
+				{
+					"type": "image_picker",
+					"id": "author_thumbnail",
+					"label": "Author thumbnail"
+				},
+				{
+					"type": "text",
+					"label": "Name",
+					"id": "name",
+					"default": "John Doe"
+				},
+				{
+					"type": "richtext",
+					"label": "Content",
+					"id": "content",
+					"default": "<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dicta natus illum fuga iure? Tempore dolor autem, nihil aliquam ab corrupti.</p>"
+				}
+			]
+		}
+	],
+	"presets": [
+		{
+			"name": "Customer reviews",
+			"blocks": [
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				}
+			]
+		}
+	]
+}
+{% endschema %}

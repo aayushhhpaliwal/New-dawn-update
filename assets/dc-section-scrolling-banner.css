@@ -1,0 +1,60 @@
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.scrolling-banner {
+  overflow: hidden;
+  background-color: rgb(--color-background);
+}
+
+.scrolling-banner--pausable:hover {
+  --play-state: paused;
+}
+
+.scrolling-banner__container {
+  animation: marquee var(--duration, 10s) linear infinite var(--play-state, running) var(--direction, normal);
+}
+
+
+.scrolling-banner__container,
+.scrolling-banner__list {
+  direction: ltr;
+  display: flex;
+  gap: var(--l-scrolling-banner-gap, 4rem);
+  align-items: center;
+}
+
+.scrolling-banner__item {
+  display: flex;
+  gap: calc(var(--l-scrolling-banner-gap, 0) / 1.5);
+  align-items: center;
+  white-space: nowrap;
+}
+
+[dir="rtl"] .scrolling-banner__item {
+  direction: rtl;
+}
+
+.scrolling-banner__item-button,
+.scrolling-banner__item-button::before,
+.scrolling-banner__item-button::after {
+  border-radius: var(--l-scrolling-radius, 0);
+}
+
+.scrolling-banner__item-image {
+  width: 100%;
+  max-width: var(--l-max-width, 100%);
+}
+
+.scrolling-banner__item-image img {
+  width: var(--l-max-width, 100%);
+  height: auto;
+  object-fit: cover;
+}

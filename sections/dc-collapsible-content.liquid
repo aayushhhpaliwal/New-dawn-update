@@ -1,0 +1,301 @@
+{{ 'dc-section-collapsible-content.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+	#shopify-section-{{ section.id }} {
+	  --page-width: {% if section.settings.show_full_width %}100%{% else %}{{ section.settings.page_width }}px{% endif %};
+	  --l-cc-tab-padding: {{ section.settings.collapsible_heading_padding }}px;
+	  --l-cc-tab-gap: {{ section.settings.collapsible_gap }}px;
+	  --l-cc-heading-color: {{ section.settings.collapsible_heading }};
+	  --l-cc-content-color: {{ section.settings.collapsible_content }};
+	  background-color: {{ section.settings.background_color }};
+	  padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+	  padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+	}
+
+	@media screen and (min-width: 750px) {
+	  #shopify-section-{{ section.id }} {
+	    padding-top: {{ section.settings.padding_top }}px;
+	    padding-bottom: {{ section.settings.padding_bottom }}px;
+	  }
+	}
+{% endstyle %}
+
+<div class="l-cc">
+	<div
+		class="l-cc__inner page-width"
+		{% if section.settings.show_only_one_tab %}
+			data-collapsible-container
+		{% endif %}
+	>
+		{%- for block in section.blocks -%}
+			<dc-collapsible-tab
+				class="l-cc__row block{% if forloop.first and section.settings.open_first_tab %} is-open{% endif %}"
+				data-one-open="true"
+			>
+				<div class="l-cc__row-heading" id="Heading-{{ block.id }}" {{ block.shopify_attributes }}>
+					<button
+						class="l-cc__row-button {{ section.settings.collapsible_heading_size }}{% if section.settings.show_border_bottom %} l-cc__row-button--border-bottom{% endif %}"
+						aria-expanded="false"
+						aria-controls="{{ block.id }}-collapse"
+						role="button"
+						data-trigger
+					>
+						{{ block.settings.title }}
+						<span class="l-cc__row-toggle"></span>
+					</button>
+				</div>
+				<div
+					id="{{ block.id }}-collapse"
+					aria-labelledby="Heading-{{ block.id }}"
+					class="l-cc__row-content rte l-rte--{{ section.settings.collapsible_content_size }}{% unless forloop.first and section.settings.open_first_tab %} hidden{% endunless %}"
+					data-content
+				>
+					<div class="l-cc__row-content-inner">
+						{{ block.settings.row_content }}
+						{{ block.settings.textarea }}
+						{{ block.settings.page.content }}
+						{{ block.settings.liquid }}
+					</div>
+				</div>
+			</dc-collapsible-tab>
+		{%- endfor -%}
+	</div>
+</div>
+
+{% schema %}
+{
+	"name": "Collapsible content",
+	"class": "section",
+	"tag": "section",
+	"settings": [
+		{
+			"type": "header",
+			"content": "Layout"
+		},
+		{
+			"type": "range",
+			"id": "page_width",
+			"min": 600,
+			"max": 1600,
+			"step": 100,
+			"default": 1200,
+			"unit": "px",
+			"label": "t:settings_schema.layout.settings.page_width.label"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_full_width",
+			"label": "Show full width",
+			"default": true
+		},
+		{
+			"type": "checkbox",
+			"id": "show_only_one_tab",
+			"label": "Show only on tab",
+			"default": false
+		},
+		{
+			"type": "checkbox",
+			"id": "open_first_tab",
+			"label": "Open first tab",
+			"default": true
+		},
+		{
+			"type": "checkbox",
+			"id": "show_border_bottom",
+			"label": "Show border bottom",
+			"default": true
+		},
+		{
+			"type": "header",
+			"content": "Tab spacing"
+		},
+		{
+			"type": "range",
+			"id": "collapsible_heading_padding",
+			"min": 0,
+			"max": 80,
+			"step": 2,
+			"default": 40,
+			"unit": "px",
+			"label": "Collapsible heading padding"
+		},
+		{
+			"type": "range",
+			"id": "collapsible_gap",
+			"min": 0,
+			"max": 80,
+			"step": 2,
+			"default": 24,
+			"unit": "px",
+			"label": "Spacing between collapsible row"
+		},
+		{
+			"type": "header",
+			"content": "Text size"
+		},
+		{
+			"type": "select",
+			"id": "collapsible_heading_size",
+			"options": [
+				{
+					"value": "h4",
+					"label": "S"
+				},
+				{
+					"value": "h3",
+					"label": "M"
+				},
+				{
+					"value": "h2",
+					"label": "L"
+				},
+				{
+					"value": "h1",
+					"label": "XL"
+				}
+			],
+			"default": "h3",
+			"label": "Collapsible heading"
+		},
+		{
+			"type": "select",
+			"id": "collapsible_content_size",
+			"options": [
+				{
+					"value": "small",
+					"label": "S"
+				},
+				{
+					"value": "medium",
+					"label": "M"
+				},
+				{
+					"value": "large",
+					"label": "L"
+				}
+			],
+			"default": "medium",
+			"label": "Collapsible content"
+		},
+		{
+			"type": "header",
+			"content": "Colors"
+		},
+		{
+			"type": "color",
+			"id": "background_color",
+			"label": "Background Color",
+			"default": "#fff"
+		},
+		{
+			"type": "color",
+			"id": "collapsible_heading",
+			"label": "Collapsible heading",
+			"default": "#000"
+		},
+		{
+			"type": "color",
+			"id": "collapsible_content",
+			"label": "Collapsible content",
+			"default": "#000"
+		},
+		{
+			"type": "header",
+			"content": "t:sections.all.padding.section_padding_heading"
+		},
+		{
+			"type": "range",
+			"id": "padding_top",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_top",
+			"default": 36
+		},
+		{
+			"type": "range",
+			"id": "padding_bottom",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_bottom",
+			"default": 36
+		}
+	],
+	"blocks": [
+		{
+			"type": "collapsible_row",
+			"name": "t:sections.collapsible_content.blocks.collapsible_row.name",
+			"settings": [
+				{
+					"type": "inline_richtext",
+					"id": "title",
+					"default": "Collapsible row",
+					"label": "t:sections.collapsible_content.blocks.collapsible_row.settings.heading.label",
+					"info": "t:sections.collapsible_content.blocks.collapsible_row.settings.heading.info"
+				},
+				{
+					"type": "header",
+					"content": "Content",
+					"info": "You can use one of them or combine some of the content inputs. We suggest using Row content as a first priority."
+				},
+				{
+					"type": "richtext",
+					"id": "row_content",
+					"label": "t:sections.collapsible_content.blocks.collapsible_row.settings.row_content.label",
+					"default": "<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae quibusdam incidunt similique cum ut temporibus praesentium sint distinctio atque repudiandae? Dolores debitis, ullam excepturi voluptatem nulla sed molestiae doloremque. Vero, neque fugiat sint omnis nulla veniam quidem repellendus nihil quis?</p>"
+				},
+				{
+					"type": "paragraph",
+					"content": "Or"
+				},
+				{
+					"type": "textarea",
+					"id": "textarea",
+					"label": "Textarea"
+				},
+				{
+					"type": "paragraph",
+					"content": "Or"
+				},
+				{
+					"type": "page",
+					"id": "page",
+					"label": "t:sections.collapsible_content.blocks.collapsible_row.settings.page.label"
+				},
+				{
+					"type": "paragraph",
+					"content": "Or"
+				},
+				{
+					"type": "liquid",
+					"id": "liquid",
+					"label": "Liquid"
+				}
+			]
+		}
+	],
+	"presets": [
+		{
+			"name": "Collapsible content",
+			"blocks": [
+				{
+					"type": "collapsible_row"
+				},
+				{
+					"type": "collapsible_row"
+				},
+				{
+					"type": "collapsible_row"
+				},
+				{
+					"type": "collapsible_row"
+				}
+			]
+		}
+	]
+}
+{% endschema %}

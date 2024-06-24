@@ -1,0 +1,411 @@
+{{ 'dc-section-customer-reviews-v2.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'dc-customer-reviews-v2.js' |  asset_url }}" defer="defer"></script>
+
+{%- style -%}
+	#{{ section.id }} {
+	  --l-verify-color: {{ section.settings.verify_color }};
+	  --l-author-thumbnail-width: {{ section.settings.thumbnail_width }}px;
+	  --l-review-card: {{ section.settings.review_card }};
+	  background-color: {{ section.settings.background_color }};
+	}
+
+	.section-{{ section.id }}-padding {
+	  padding-top: calc({{ section.settings.padding_top }}px * 0.75);
+	  padding-bottom: calc({{ section.settings.padding_bottom }}px * 0.75);
+	}
+
+	@media screen and (min-width: 750px) {
+	  .section-{{ section.id }}-padding {
+	    padding-top: {{ section.settings.padding_top }}px;
+	    padding-bottom: {{ section.settings.padding_bottom }}px;
+	  }
+	}
+{%- endstyle -%}
+
+{% liquid
+	assign review_blocks = section.blocks | where: 'type', 'review'
+%}
+
+<dc-customer-reviews
+	class="dc-customer-reviews color-{{ section.settings.color_scheme }} hidden"
+	id="{{ section.id }}"
+	data-section-id="{{ section.id }}"
+>
+	<div class="section-{{ section.id }}-padding page-width">
+		{%- if section.settings.heading != blank or section.settings.text != blank -%}
+			<div class="dc-customer-reviews__header">
+				{%- if section.settings.heading != blank -%}
+					<h2
+						class="dc-customer-reviews__heading rich-text__heading rte inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+						{% if settings.animations_reveal_on_scroll %}
+							data-cascade
+							style="--animation-order: 1;"
+						{% endif %}
+					>
+						{{ section.settings.heading }}
+					</h2>
+					{%- if section.blocks.size > 1 -%}
+						<div class="dc-customer-reviews__nav flex items-center">
+							<button
+								class="dc-customer-reviews__nav-btn dc-customer-reviews__nav-btn--prev l-button--reset flex items-center justify-center small-hide"
+								id="NavigationPrev-{{ section.id }}"
+								disabled
+							>
+								<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M41.1665 26H10.8332" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+									<path d="M23.8335 39L10.8335 26" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+									<path d="M23.8335 13L10.8335 26" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+								</svg>
+							</button>
+							<button
+								class="dc-customer-reviews__nav-btn dc-customer-reviews__nav-btn--next l-button--reset flex items-center justify-center small-hide"
+								id="NavigationNext-{{ section.id }}"
+								disabled
+							>
+								<svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M10.8333 26H41.1666" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+									<path d="M28.1667 39L41.1667 26" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+									<path d="M28.1667 13L41.1667 26" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+								</svg>
+							</button>
+						</div>
+					{%- endif -%}
+				{%- endif -%}
+			</div>
+		{%- endif -%}
+
+		{%- if review_blocks.size > 0 -%}
+			<div class="dc-customer-reviews__list l-flickity-reset{% if section.settings.enable_carousel %} js-carousel{% else %} grid grid--{{ section.settings.columns_mobile }}-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop{% endif %}">
+				{%- for index in (1..section.settings.loop) -%}
+					{%- for block in review_blocks -%}
+						<div
+							class="dc-customer-reviews__item{% if section.settings.enable_carousel %} dc-customer-reviews__item--carousel{% else %} grid__item{% endif %}"
+							{{ block.shopify_attributes }}
+						>
+							<div class="dc-customer-reviews__item-header flex flex-wrap items-start justify-between">
+								<div class="dc-customer-reviews__item-info">
+									{%- if block.settings.author_thumbnail != blank -%}
+										<div class="dc-customer-reviews__item-thumbnail">
+											{{
+												block.settings.author_thumbnail
+												| image_url: width: 80
+												| image_tag: sizes: '50, 75, 100, 150, 200'
+											}}
+										</div>
+									{%- endif -%}
+									<span class="dc-customer-reviews__item-name">{{ block.settings.name }}</span>
+									{%- if block.settings.position_role != blank -%}
+										<span class="dc-customer-reviews__item-position">
+											<svg width="114" height="17" viewBox="0 0 114 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+												<path d="M9.47509 1.77415C9.79704 2.68527 10.8369 3.11347 11.7062 2.69815C13.0906 2.04137 14.533 3.48371 13.8762 4.86811C13.4609 5.74061 13.8923 6.7773 14.8002 7.09926C16.2425 7.61116 16.2425 9.65235 14.8002 10.1675C13.8923 10.4894 13.4609 11.5293 13.8762 12.3986C14.533 13.783 13.0906 15.2254 11.7062 14.5686C10.8337 14.1532 9.79704 14.5847 9.47509 15.4926C8.96318 16.9349 6.922 16.9349 6.40687 15.4926C6.08492 14.5847 5.04501 14.1532 4.17573 14.5686C2.79134 15.2254 1.34899 13.783 2.00577 12.3986C2.42109 11.5261 1.98967 10.4894 1.08176 10.1675C-0.360588 9.65557 -0.360588 7.61438 1.08176 7.09926C1.98967 6.7773 2.42109 5.73739 2.00577 4.86811C1.34899 3.48371 2.79134 2.04137 4.17573 2.69815C5.04823 3.11347 6.08492 2.68205 6.40687 1.77415C6.922 0.331795 8.96318 0.331795 9.47509 1.77415Z" fill="#029E00"/>
+												<path d="M6.85756 9.24662C7.48537 8.74437 8.1003 8.24856 8.71845 7.75276C9.42997 7.17968 10.1383 6.60338 10.8562 6.03996C11.4229 5.59567 12.1891 5.88865 12.3243 6.59695C12.3952 6.96397 12.2535 7.25051 11.9702 7.47909C10.8594 8.37734 9.75192 9.27559 8.64118 10.1706C8.22586 10.5087 7.81055 10.8467 7.39201 11.1783C6.90586 11.5679 6.40361 11.526 5.99473 11.0592C5.2639 10.2286 4.53628 9.39471 3.80867 8.56085C3.43842 8.13587 3.46418 7.54348 3.8634 7.20221C4.25296 6.8706 4.82926 6.93499 5.19951 7.35675C5.75005 7.98134 6.29737 8.60915 6.85756 9.24662Z" fill="#FDFEFD"/>
+												<path d="M26.3712 5.59241L23.2869 12.4532C23.1967 12.6593 23.1162 12.7269 22.981 12.7269H22.923C22.7749 12.7269 22.7073 12.6464 22.6172 12.4532L19.5329 5.59241C19.4524 5.42178 19.5683 5.27368 19.7486 5.27368H20.1478C20.3539 5.27368 20.4665 5.3767 20.5567 5.59241L22.9585 11.1236L25.3699 5.59241C25.46 5.3767 25.5759 5.27368 25.7788 5.27368H26.1555C26.339 5.27368 26.442 5.42178 26.3712 5.59241Z" fill="#029E00"/>
+												<path d="M29.5456 12.0188C30.0479 12.0188 30.6821 11.8836 31.297 11.3717C31.5031 11.201 31.6512 11.2236 31.7864 11.3717L31.8991 11.4747C32.0697 11.6582 31.9892 11.816 31.8766 11.9287C31.194 12.5887 30.2282 12.8044 29.5424 12.8044C27.9841 12.8044 26.5257 11.7226 26.5257 9.84563C26.5257 8.1264 27.7556 6.8418 29.3943 6.8418C30.2024 6.8418 30.8849 7.12511 31.3743 7.60482C31.9313 8.15215 32.2275 8.9023 32.2275 9.7104C32.2275 9.92611 32.0697 10.0742 31.8411 10.0742H27.4497C27.5559 11.3266 28.5121 12.0188 29.5456 12.0188ZM27.4658 9.32406H31.3131C31.2455 8.85723 31.062 8.458 30.7884 8.18756C30.4567 7.82375 29.9803 7.63059 29.4007 7.63059C28.3641 7.62737 27.6139 8.28737 27.4658 9.32406Z" fill="#029E00"/>
+												<path d="M36.6351 7.32155L36.59 7.50506C36.5224 7.73365 36.3517 7.75619 36.1811 7.71111C36.0459 7.66604 35.9203 7.64351 35.7819 7.64351C34.9384 7.64351 34.4393 8.39365 34.4393 9.41746V12.3376C34.4393 12.5308 34.3363 12.6692 34.1335 12.6692H33.8502C33.657 12.6692 33.5443 12.534 33.5443 12.3376V7.25072C33.5443 7.04467 33.657 6.91911 33.8502 6.91911H34.0788C34.2719 6.91911 34.3846 7.04467 34.3846 7.25072V7.72721C34.6905 7.17989 35.1798 6.83862 35.8624 6.83862C36.1232 6.83862 36.2487 6.86116 36.4419 6.90623C36.6029 6.95774 36.7156 7.04789 36.6351 7.32155Z" fill="#029E00"/>
+												<path d="M37.3401 5.1709C37.3401 4.78455 37.6588 4.46582 38.0452 4.46582C38.4315 4.46582 38.7503 4.78455 38.7503 5.1709C38.7503 5.57012 38.4315 5.87598 38.0452 5.87598C37.6588 5.87598 37.3401 5.5669 37.3401 5.1709ZM37.5912 12.3376V7.25072C37.5912 7.04467 37.7039 6.91911 37.8971 6.91911H38.1804C38.3736 6.91911 38.4863 7.04467 38.4863 7.25072V12.3376C38.4863 12.5308 38.3736 12.6692 38.1804 12.6692H37.8971C37.7039 12.6692 37.5912 12.534 37.5912 12.3376Z" fill="#029E00"/>
+												<path d="M44.9092 7.23136V12.3375C44.9092 12.5307 44.8062 12.6691 44.613 12.6691H44.3168C44.1237 12.6691 44.011 12.5339 44.011 12.3375V7.67243H41.4965V12.3601C41.4965 12.5532 41.3935 12.6659 41.1907 12.6659H40.9074C40.7142 12.6659 40.6015 12.5532 40.6015 12.3601V7.67243H39.9544C39.7612 7.67243 39.6485 7.55975 39.6485 7.36657V7.23136C39.6485 7.03819 39.7612 6.9255 39.9544 6.9255H40.6015V6.52628C40.6015 5.12578 41.4772 4.53339 42.4334 4.53339C42.7393 4.53339 43.0258 4.59134 43.2866 4.73943C43.4347 4.81992 43.5699 4.9326 43.4572 5.17085L43.3896 5.30607C43.2641 5.54432 43.1063 5.51212 42.9453 5.44129C42.7618 5.33826 42.6395 5.30607 42.4688 5.30607C41.8893 5.30607 41.503 5.66988 41.503 6.52306V6.92228H44.6195C44.8062 6.92228 44.9092 7.03497 44.9092 7.23136ZM45.17 5.21593C45.17 5.61515 44.8513 5.92101 44.465 5.92101C44.0786 5.92101 43.7599 5.61515 43.7599 5.21593C43.7599 4.82958 44.0786 4.52051 44.465 4.52051C44.8513 4.52051 45.17 4.82958 45.17 5.21593Z" fill="#029E00"/>
+												<path d="M49.3232 12.0188C49.8255 12.0188 50.4597 11.8836 51.0747 11.3717C51.2807 11.201 51.4288 11.2236 51.564 11.3717L51.6767 11.4747C51.8474 11.6582 51.7669 11.816 51.6542 11.9287C50.9716 12.5887 50.0058 12.8044 49.32 12.8044C47.7618 12.8044 46.3033 11.7226 46.3033 9.84563C46.3033 8.1264 47.5332 6.8418 49.1719 6.8418C49.98 6.8418 50.6626 7.12511 51.1519 7.60482C51.7089 8.15215 52.0051 8.9023 52.0051 9.7104C52.0051 9.92611 51.8474 10.0742 51.6188 10.0742H47.2273C47.3303 11.3266 48.2865 12.0188 49.3232 12.0188ZM47.2402 9.32406H51.0875C51.0199 8.85723 50.8364 8.458 50.5628 8.18756C50.2311 7.82375 49.7546 7.63059 49.1751 7.63059C48.1384 7.62737 47.3883 8.28737 47.2402 9.32406Z" fill="#029E00"/>
+												<path d="M58.7211 4.8617V12.3375C58.7211 12.5306 58.6084 12.6691 58.4152 12.6691H58.1544C57.9612 12.6691 57.8486 12.5339 57.8486 12.3375V11.906C57.3592 12.4405 56.6541 12.8043 55.7881 12.8043C54.0817 12.8043 52.9098 11.4714 52.9098 9.82301C52.9098 8.16173 54.0817 6.84171 55.7881 6.84171C56.6187 6.84171 57.3238 7.16045 57.826 7.67236V4.94219C57.826 4.77156 57.9162 4.66853 58.1222 4.61058L58.3605 4.55263C58.618 4.48824 58.7211 4.62346 58.7211 4.8617ZM57.9129 9.82301C57.9129 8.36778 56.9696 7.64982 55.875 7.64982C54.6129 7.64982 53.8145 8.63822 53.8145 9.82301C53.8145 11.0078 54.6097 11.9962 55.875 11.9962C56.9793 11.9962 57.9129 11.2686 57.9129 9.82301Z" fill="#029E00"/>
+												<path d="M63.0095 8.96996C63.0095 6.77424 64.7062 5.1355 66.8568 5.1355C68.0287 5.1355 69.0525 5.62486 69.748 6.41043C69.8832 6.55853 69.8606 6.71628 69.7029 6.84185L69.5097 6.99961C69.3519 7.12517 69.2038 7.08975 69.0557 6.93199C68.4988 6.3396 67.7583 5.97579 66.8826 5.97579C65.2342 5.97579 63.9463 7.2282 63.9463 8.96996C63.9463 10.7117 65.2309 11.9641 66.8826 11.9641C67.7583 11.9641 68.5084 11.6003 69.0557 11.0079C69.2038 10.8502 69.3519 10.8148 69.5097 10.9403L69.7029 11.0981C69.8606 11.2236 69.8864 11.3814 69.748 11.5198C69.0525 12.3151 68.0287 12.8044 66.8568 12.8044C64.7062 12.8044 63.0095 11.1657 63.0095 8.96996Z" fill="#029E00"/>
+												<path d="M75.9134 7.25377V12.3374C75.9134 12.5306 75.8007 12.669 75.6075 12.669H75.3789C75.1857 12.669 75.0731 12.5338 75.0731 12.3374V11.9736C74.6867 12.4855 74.0814 12.8043 73.2637 12.8043C71.9083 12.8043 71.01 11.8609 71.01 10.4476V7.25056C71.01 7.04451 71.1227 6.91895 71.3159 6.91895H71.6121C71.8052 6.91895 71.9083 7.04451 71.9083 7.25056V10.425C71.9083 11.3683 72.5103 12.0058 73.4214 12.0058C74.3873 12.0058 75.0151 11.3587 75.0151 10.3574V7.25056C75.0151 7.04451 75.1181 6.91895 75.3113 6.91895H75.6075C75.8007 6.92216 75.9134 7.04772 75.9134 7.25377Z" fill="#029E00"/>
+												<path d="M77.2462 11.8966C77.1335 11.7485 77.0627 11.5778 77.2688 11.4201L77.3493 11.3396C77.507 11.2044 77.6551 11.1561 77.8386 11.3525C78.2153 11.7742 78.7143 12.0254 79.2842 12.0254C79.9796 12.0254 80.4561 11.7066 80.4561 11.2076C80.4561 10.5605 79.8186 10.3319 79.1007 10.0357C78.2926 9.70407 77.4845 9.35314 77.4845 8.43235C77.4845 7.47615 78.2475 6.85156 79.4065 6.85156C80.0215 6.85156 80.6461 7.05762 81.1354 7.57918C81.2706 7.7144 81.3415 7.87537 81.158 8.06855L81.0775 8.14903C80.9519 8.2746 80.7813 8.35509 80.5881 8.17157C80.1663 7.76269 79.8605 7.62425 79.3808 7.62425C78.7787 7.62425 78.3924 7.92045 78.3924 8.35187C78.3924 8.80582 78.8463 9.02475 79.4741 9.29519C80.4529 9.71695 81.364 10.0453 81.364 11.1947C81.364 12.1735 80.5463 12.8109 79.3261 12.8109C78.5984 12.8045 77.7581 12.4986 77.2462 11.8966Z" fill="#029E00"/>
+												<path d="M85.5977 12.4985C85.3144 12.6917 84.9828 12.8044 84.5513 12.8044C83.5501 12.8044 82.845 12.1894 82.845 10.9821V7.66919H82.2075C82.0144 7.66919 81.8888 7.55651 81.8888 7.36333V7.22812C81.8888 7.03495 82.0144 6.92226 82.2075 6.92226H82.845V5.3286C82.845 5.15796 82.948 5.05494 83.1508 4.99699L83.3891 4.93903C83.6402 4.87142 83.7432 5.00664 83.7432 5.24489V6.91905H85.1888C85.3949 6.91905 85.5172 7.03172 85.5172 7.2249V7.36012C85.5172 7.55329 85.3916 7.66597 85.1888 7.66597H83.7432V10.9435C83.7432 11.684 84.0974 12.0027 84.6415 12.0027C84.8701 12.0027 85.0407 11.9222 85.2339 11.8095C85.4625 11.6743 85.588 11.7516 85.6878 11.9222L85.7555 12.0478C85.881 12.2603 85.7233 12.418 85.5977 12.4985Z" fill="#029E00"/>
+												<path d="M86.1418 9.82309C86.1418 8.13927 87.4264 6.8418 89.1682 6.8418C90.9099 6.8418 92.1945 8.13927 92.1945 9.82309C92.1945 11.5069 90.9099 12.8044 89.1682 12.8044C87.4296 12.8044 86.1418 11.5069 86.1418 9.82309ZM91.2866 9.82309C91.2866 8.57069 90.4109 7.6499 89.1714 7.6499C87.9415 7.6499 87.0562 8.57069 87.0562 9.82309C87.0562 11.0755 87.9319 11.9963 89.1714 11.9963C90.4109 11.9963 91.2866 11.0755 91.2866 9.82309Z" fill="#029E00"/>
+												<path d="M102.561 9.21138V12.3375C102.561 12.5307 102.449 12.6692 102.256 12.6692H101.959C101.766 12.6692 101.663 12.5339 101.663 12.3375V9.28864C101.663 8.28737 101.106 7.64024 100.15 7.64024C99.1938 7.64024 98.5016 8.28737 98.5016 9.28864V12.3375C98.5016 12.5307 98.3985 12.6692 98.2054 12.6692H97.9092C97.716 12.6692 97.6033 12.5339 97.6033 12.3375V9.28864C97.6033 8.28737 97.0463 7.64024 96.0901 7.64024C95.1339 7.64024 94.4417 8.28737 94.4417 9.28864V12.3375C94.4417 12.5307 94.3387 12.6692 94.1359 12.6692H93.8526C93.6594 12.6692 93.5467 12.5339 93.5467 12.3375V7.25068C93.5467 7.04463 93.6594 6.91907 93.8526 6.91907H94.0811C94.2743 6.91907 94.387 7.04463 94.387 7.25068V7.71751C94.7862 7.17019 95.4333 6.8418 96.264 6.8418C97.2073 6.8418 97.8898 7.27321 98.244 7.97829C98.6303 7.28287 99.358 6.8418 100.314 6.8418C101.721 6.8418 102.561 7.82054 102.561 9.21138Z" fill="#029E00"/>
+												<path d="M106.863 12.0188C107.365 12.0188 107.999 11.8836 108.614 11.3717C108.82 11.201 108.968 11.2236 109.104 11.3717L109.216 11.4747C109.387 11.6582 109.306 11.816 109.194 11.9287C108.511 12.5887 107.545 12.8044 106.86 12.8044C105.301 12.8044 103.843 11.7226 103.843 9.84563C103.843 8.1264 105.073 6.8418 106.711 6.8418C107.52 6.8418 108.202 7.12511 108.691 7.60482C109.248 8.15215 109.545 8.9023 109.545 9.7104C109.545 9.92611 109.387 10.0742 109.158 10.0742H104.767C104.873 11.3266 105.829 12.0188 106.863 12.0188ZM104.78 9.32406H108.627C108.559 8.85723 108.376 8.458 108.102 8.18756C107.771 7.82375 107.294 7.63059 106.715 7.63059C105.681 7.62737 104.928 8.28737 104.78 9.32406Z" fill="#029E00"/>
+												<path d="M113.952 7.32155L113.907 7.50506C113.839 7.73365 113.669 7.75619 113.498 7.71111C113.363 7.66604 113.237 7.64351 113.099 7.64351C112.255 7.64351 111.756 8.39365 111.756 9.41746V12.3376C111.756 12.5308 111.653 12.6692 111.451 12.6692H111.167C110.974 12.6692 110.861 12.534 110.861 12.3376V7.25072C110.861 7.04467 110.974 6.91911 111.167 6.91911H111.396C111.589 6.91911 111.702 7.04467 111.702 7.25072V7.72721C112.008 7.17989 112.497 6.83862 113.179 6.83862C113.44 6.83862 113.566 6.86116 113.759 6.90623C113.917 6.95774 114.033 7.04789 113.952 7.32155Z" fill="#029E00"/>
+											</svg>
+										</span>
+									{%- endif -%}
+								</div>
+
+								<span class="dc-customer-reviews__item-rating">
+									{% for index in (1..5) %}
+										<svg width="26" height="27" viewBox="0 0 26 27" fill="none" xmlns="http://www.w3.org/2000/svg">
+											<path d="M4.8875 26.4701L6.96389 17.0213L0 10.666L9.2 9.82537L12.7778 0.914551L16.3556 9.82537L25.5556 10.666L18.5917 17.0213L20.6681 26.4701L12.7778 21.4599L4.8875 26.4701Z" fill="black"/>
+										</svg>
+									{% endfor %}
+								</span>
+							</div>
+
+							<div class="dc-customer-reviews__item-content rte">
+								{{ block.settings.content }}
+							</div>
+						</div>
+					{%- endfor -%}
+				{%- endfor -%}
+			</div>
+		{%- endif -%}
+	</div>
+</dc-customer-reviews>
+
+{% schema %}
+{
+	"name": "Customer reviews V2",
+	"tag": "section",
+	"class": "section",
+	"settings": [
+		{
+			"type": "color_scheme",
+			"id": "color_scheme",
+			"label": "t:sections.all.colors.label",
+			"default": "scheme-1"
+		},
+		{
+			"type": "range",
+			"id": "loop",
+			"label": "Loop",
+			"min": 1,
+			"max": 20,
+			"step": 1,
+			"unit": "l",
+			"default": 4
+		},
+		{
+			"type": "header",
+			"content": "Header"
+		},
+		{
+			"type": "inline_richtext",
+			"id": "heading",
+			"default": "WHAT OUR CUSTOMERS SAY ABOUT US",
+			"label": "t:sections.rich-text.blocks.heading.settings.heading.label"
+		},
+		{
+			"type": "select",
+			"id": "heading_size",
+			"options": [
+				{
+					"value": "h2",
+					"label": "t:sections.all.heading_size.options__1.label"
+				},
+				{
+					"value": "h1",
+					"label": "t:sections.all.heading_size.options__2.label"
+				},
+				{
+					"value": "h0",
+					"label": "t:sections.all.heading_size.options__3.label"
+				},
+				{
+					"value": "hxl",
+					"label": "t:sections.all.heading_size.options__4.label"
+				}
+			],
+			"default": "h1",
+			"label": "t:sections.all.heading_size.label"
+		},
+		{
+			"type": "header",
+			"content": "Review card"
+		},
+		{
+			"type": "header",
+			"content": "Layout"
+		},
+		{
+			"type": "checkbox",
+			"id": "enable_carousel",
+			"label": "Enable carousel",
+			"default": true
+		},
+		{
+			"type": "range",
+			"id": "columns_desktop",
+			"min": 1,
+			"max": 4,
+			"step": 1,
+			"default": 3,
+			"label": "t:sections.multicolumn.settings.columns_desktop.label"
+		},
+		{
+			"type": "select",
+			"id": "columns_mobile",
+			"options": [
+				{
+					"value": "1",
+					"label": "t:sections.multicolumn.settings.columns_mobile.options__1.label"
+				},
+				{
+					"value": "2",
+					"label": "t:sections.multicolumn.settings.columns_mobile.options__2.label"
+				}
+			],
+			"default": "1",
+			"label": "t:sections.multicolumn.settings.columns_mobile.label"
+		},
+		{
+			"type": "header",
+			"content": "Colors"
+		},
+		{
+			"type": "color",
+			"id": "background_color",
+			"label": "Background Color",
+			"default": "#D9EFF9"
+		},
+		{
+			"type": "color",
+			"id": "review_card",
+			"label": "Review card",
+			"default": "#f8f8f8"
+		},
+		{
+			"type": "color",
+			"id": "verify_color",
+			"label": "Verify color",
+			"default": "#72bf71"
+		},
+		{
+			"type": "header",
+			"content": "t:sections.all.padding.section_padding_heading"
+		},
+		{
+			"type": "range",
+			"id": "padding_top",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_top",
+			"default": 40
+		},
+		{
+			"type": "range",
+			"id": "padding_bottom",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_bottom",
+			"default": 52
+		}
+	],
+	"blocks": [
+		{
+			"type": "top_images",
+			"name": "Header thumbnails",
+			"settings": [
+				{
+					"type": "image_picker",
+					"id": "image_1",
+					"label": "Thumbnail 1"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_2",
+					"label": "Thumbnail 2"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_3",
+					"label": "Thumbnail 3"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_4",
+					"label": "Thumbnail 4"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_5",
+					"label": "Thumbnail 5"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_6",
+					"label": "Thumbnail 6"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_7",
+					"label": "Thumbnail 7"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_8",
+					"label": "Thumbnail 8"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_9",
+					"label": "Thumbnail 9"
+				},
+				{
+					"type": "image_picker",
+					"id": "image_10",
+					"label": "Thumbnail 10"
+				}
+			]
+		},
+		{
+			"type": "review",
+			"name": "Review",
+			"settings": [
+				{
+					"type": "text",
+					"label": "Name",
+					"id": "name",
+					"default": "John Doe"
+				},
+				{
+					"type": "text",
+					"id": "position_role",
+					"label": "Position / Role",
+					"default": "Landscape Architect"
+				},
+				{
+					"type": "richtext",
+					"label": "Content",
+					"id": "content",
+					"default": "<p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dicta natus illum fuga iure? Tempore dolor autem, nihil aliquam ab corrupti.</p>"
+				}
+			]
+		}
+	],
+	"presets": [
+		{
+			"name": "Customer reviews V2",
+			"blocks": [
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				},
+				{
+					"type": "review"
+				}
+			]
+		}
+	]
+}
+{% endschema %}

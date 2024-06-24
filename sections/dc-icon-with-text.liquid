@@ -1,0 +1,364 @@
+{{ 'dc-section-icon-with-text.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+	.section-{{ section.id }}-padding {
+	  padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+	  padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+	}
+
+	@media screen and (min-width: 750px) {
+	  .section-{{ section.id }}-padding {
+	    padding-top: {{ section.settings.padding_top }}px;
+	    padding-bottom: {{ section.settings.padding_bottom }}px;
+	  }
+	}
+{%- endstyle -%}
+
+<div class="dc-iwt color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+	<div class="dc-iwt__container page-width">
+		{%- unless section.settings.title == blank -%}
+			<div class="title-wrapper-with-link title-wrapper--self-padded-mobile title-wrapper--no-top-margin">
+				<h2 class="title inline-richtext {{ section.settings.heading_size }}">
+					{{ section.settings.title }}
+				</h2>
+			</div>
+		{%- endunless -%}
+
+		<div class="dc-iwt__list grid grid grid--{{ section.settings.columns_mobile }}-col-tablet-down grid--{{ section.settings.columns_desktop }}-col-desktop">
+			{%- for block in section.blocks -%}
+				{% liquid
+					assign icon = block.settings.icon
+					assign link = block.settings.link
+					assign max_width = block.settings.max_width
+					assign title = block.settings.title
+					assign subtitle = block.settings.subtitle
+				%}
+				{%- capture block_style -%}
+          --icon-max-width: {{ max_width }}px;
+          --mobile-type: {{ section.settings.content_type_mobile }};
+          --desktop-type: {{ section.settings.content_type_desktop }};
+          --mobile-alignment: {{ section.settings.card_content_alignment_mob }};
+          --desktop-alignment: {{ section.settings.card_content_alignment_desk }};
+        {%- endcapture -%}
+				<div
+					class="dc-iwt__item dc-iwt__item--desk-{{ section.settings.content_type_desktop }} dc-iwt__item--mob-{{ section.settings.content_type_mobile }} grid__item"
+					style="{{ block_style }}"
+					{{ block.shopify_attributes }}
+				>
+					{%- if link != blank -%}
+						<a href="{{ link }}" class="dc-iwt__link">{{ icon.alt | default: shop.name }}</a>
+					{%- endif -%}
+					<div
+						class="dc-iwt__media{% unless icon %} dc-iwt__media--default{% endunless %}"
+						style="--icon-ratio: {{ icon.aspect_ratio | default: 1 | times: 100.0 }}%;"
+					>
+						{%- if icon != blank -%}
+							<img
+								srcset="
+									{%- if icon.width >= 165 -%}{{ icon | image_url: width: 165 }} 165w,{%- endif -%}
+									{%- if icon.width >= 360 -%}{{ icon | image_url: width: 360 }} 360w,{%- endif -%}
+									{%- if icon.width >= 533 -%}{{ icon | image_url: width: 533 }} 533w,{%- endif -%}
+									{%- if icon.width >= 720 -%}{{ icon | image_url: width: 720 }} 720w,{%- endif -%}
+									{%- if icon.width >= 940 -%}{{ icon | image_url: width: 940 }} 940w,{%- endif -%}
+									{%- if icon.width >= 1066 -%}{{ icon | image_url: width: 1066 }} 1066w,{%- endif -%}
+									{{ icon | image_url }} {{ icon.width }}w
+								"
+								src="{{ icon | image_url: width: icon.width }}"
+								sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 130 | divided_by: 4 }}px, (min-width: 990px) calc((100vw - 130px) / 4), (min-width: 750px) calc((100vw - 120px) / 3), calc((100vw - 35px) / 2)"
+								alt="{{ icon.alt | escape }}"
+								class="dc-iwt__img motion-reduce"
+								loading="lazy"
+								width="{{ icon.width }}"
+								height="{{ icon.height }}"
+							>
+						{%- else -%}
+							{{ 'image' | placeholder_svg_tag }}
+						{%- endif -%}
+					</div>
+					{%- if title != blank or subtitle != blank -%}
+						<div class="dc-iwt__content">
+							{%- if title != blank -%}
+								<span class="dc-iwt__title {{ section.settings.card_heading_size }}">{{ title }}</span>
+							{%- endif -%}
+							{%- if subtitle != blank -%}
+								<div class="dc-iwt__subtitle dc-iwt__subtitle--{{ section.settings.card_subtitle_size }} rte">
+									{{ subtitle }}
+								</div>
+							{%- endif -%}
+						</div>
+					{%- endif -%}
+				</div>
+			{%- endfor -%}
+		</div>
+	</div>
+</div>
+
+{% schema %}
+{
+	"name": "Icon with text",
+	"tag": "section",
+	"class": "section",
+	"settings": [
+		{
+			"type": "color_scheme",
+			"id": "color_scheme",
+			"label": "t:sections.all.colors.label",
+			"default": "scheme-1"
+		},
+		{
+			"type": "header",
+			"content": "Section Heading"
+		},
+		{
+			"type": "inline_richtext",
+			"id": "title",
+			"default": "Icon with text",
+			"label": "t:sections.multicolumn.settings.title.label"
+		},
+		{
+			"type": "select",
+			"id": "heading_size",
+			"options": [
+				{
+					"value": "h2",
+					"label": "t:sections.all.heading_size.options__1.label"
+				},
+				{
+					"value": "h1",
+					"label": "t:sections.all.heading_size.options__2.label"
+				},
+				{
+					"value": "h0",
+					"label": "t:sections.all.heading_size.options__3.label"
+				}
+			],
+			"default": "h1",
+			"label": "t:sections.all.heading_size.label"
+		},
+		{
+			"type": "range",
+			"id": "columns_desktop",
+			"min": 1,
+			"max": 5,
+			"step": 1,
+			"default": 4,
+			"label": "t:sections.multicolumn.settings.columns_desktop.label"
+		},
+		{
+			"type": "select",
+			"id": "columns_mobile",
+			"options": [
+				{
+					"value": "1",
+					"label": "t:sections.multicolumn.settings.columns_mobile.options__1.label"
+				},
+				{
+					"value": "2",
+					"label": "t:sections.multicolumn.settings.columns_mobile.options__2.label"
+				}
+			],
+			"default": "1",
+			"label": "t:sections.multicolumn.settings.columns_mobile.label"
+		},
+		{
+			"type": "header",
+			"content": "Card styles"
+		},
+		{
+			"type": "select",
+			"id": "card_heading_size",
+			"options": [
+				{
+					"value": "h3",
+					"label": "t:sections.all.heading_size.options__1.label"
+				},
+				{
+					"value": "h2",
+					"label": "t:sections.all.heading_size.options__2.label"
+				},
+				{
+					"value": "h1",
+					"label": "t:sections.all.heading_size.options__3.label"
+				}
+			],
+			"default": "h3",
+			"label": "t:sections.all.heading_size.label"
+		},
+		{
+			"type": "select",
+			"id": "card_subtitle_size",
+			"options": [
+				{
+					"value": "sm",
+					"label": "SM"
+				},
+				{
+					"value": "md",
+					"label": "MD"
+				},
+				{
+					"value": "lg",
+					"label": "LG"
+				}
+			],
+			"default": "sm",
+			"label": "Cart subtitle size"
+		},
+		{
+			"type": "select",
+			"id": "content_type_desktop",
+			"options": [
+				{
+					"value": "row",
+					"label": "Row"
+				},
+				{
+					"value": "column",
+					"label": "Column"
+				}
+			],
+			"default": "row",
+			"label": "Content type - Desktop"
+		},
+		{
+			"type": "select",
+			"id": "content_type_mobile",
+			"options": [
+				{
+					"value": "row",
+					"label": "Row"
+				},
+				{
+					"value": "column",
+					"label": "Column"
+				}
+			],
+			"default": "row",
+			"label": "Content type - Mobile"
+		},
+		{
+			"type": "select",
+			"id": "card_content_alignment_desk",
+			"options": [
+				{
+					"value": "left",
+					"label": "Left"
+				},
+				{
+					"value": "center",
+					"label": "Center"
+				},
+				{
+					"value": "right",
+					"label": "Right"
+				}
+			],
+			"default": "left",
+			"label": "Content alignment - Desktop"
+		},
+		{
+			"type": "select",
+			"id": "card_content_alignment_mob",
+			"options": [
+				{
+					"value": "left",
+					"label": "Left"
+				},
+				{
+					"value": "center",
+					"label": "Center"
+				},
+				{
+					"value": "right",
+					"label": "Right"
+				}
+			],
+			"default": "left",
+			"label": "Content alignment - Mobile"
+		},
+		{
+			"type": "header",
+			"content": "t:sections.all.padding.section_padding_heading"
+		},
+		{
+			"type": "range",
+			"id": "padding_top",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_top",
+			"default": 36
+		},
+		{
+			"type": "range",
+			"id": "padding_bottom",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_bottom",
+			"default": 36
+		}
+	],
+	"blocks": [
+		{
+			"name": "Icon with text",
+			"type": "icon_with_text",
+			"settings": [
+				{
+					"type": "image_picker",
+					"id": "icon",
+					"label": "Icon"
+				},
+				{
+					"type": "range",
+					"id": "max_width",
+					"label": "Max Width",
+					"min": 40,
+					"max": 320,
+					"step": 4,
+					"unit": "px",
+					"default": 100
+				},
+				{
+					"type": "inline_richtext",
+					"id": "title",
+					"label": "Title",
+					"default": "Icon with text"
+				},
+				{
+					"type": "richtext",
+					"id": "subtitle",
+					"label": "Subtitle",
+					"default": "<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>"
+				},
+				{
+					"type": "url",
+					"id": "link",
+					"label": "Link (optional)"
+				}
+			]
+		}
+	],
+	"presets": [
+		{
+			"name": "Icon with text",
+			"blocks": [
+				{
+					"type": "icon_with_text"
+				},
+				{
+					"type": "icon_with_text"
+				},
+				{
+					"type": "icon_with_text"
+				},
+				{
+					"type": "icon_with_text"
+				}
+			]
+		}
+	]
+}
+{% endschema %}

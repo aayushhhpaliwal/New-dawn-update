@@ -1,0 +1,377 @@
+{{ 'dc-section-tabs.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+	#shopify-section-{{ section.id }} {
+	  --page-width: {% if section.settings.show_full_width %}100%{% else %}{{ section.settings.page_width }}px{% endif %};
+	  --dc-tab-name-gap: {{ section.settings.tab_name_gap }}px;
+	  --dc-tab-header-content-gap: {{ section.settings.gap_header_content }}px;
+	  --color-button-text: {{ section.settings.tab_title_color.red }}, {{ section.settings.tab_title_color.green }}, {{ section.settings.tab_title_color.blue }};
+	  --color-button: {{ section.settings.tab_title_bg.red }}, {{ section.settings.tab_title_bg.green }}, {{ section.settings.tab_title_bg.blue }};
+	  --dc-tab-active-bg-color: {{ section.settings.tab_title_active_bg.red }}, {{ section.settings.tab_title_active_bg.green }},{{ section.settings.tab_title_active_bg.blue }};
+	  --dc-tab-content-color: {{ section.settings.tab_content_color.red }}, {{ section.settings.tab_content_color.green }}, {{ section.settings.tab_content_color.blue }};
+	  --dc-tab-content-link-color: {{ section.settings.tab_content_link_color }};
+	  background-color: {{ section.settings.background_color }};
+	  padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+	  padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+	}
+
+	#shopify-section-{{ section.id }} .dc-tabs__button:hover,
+	#shopify-section-{{ section.id }} .dc-tabs__button.is-active {
+	  --color-button-text: {{ section.settings.tab_title_active_color.red }}, {{ section.settings.tab_title_active_color.green }}, {{ section.settings.tab_title_active_color.blue }};
+	  --color-button: {{ section.settings.tab_title_active_bg.red }}, {{ section.settings.tab_title_active_bg.green }}, {{ section.settings.tab_title_active_bg.blue }};
+	}
+
+	@media screen and (min-width: 750px) {
+	  #shopify-section-{{ section.id }} {
+	    padding-top: {{ section.settings.padding_top }}px;
+	    padding-bottom: {{ section.settings.padding_bottom }}px;
+	  }
+	}
+{% endstyle %}
+
+<div class="dc-tabs__container page-width">
+	<dc-tabs class="dc-tabs dc-tabs--{{ section.settings.tab_layout }} block{% if settings.animations_reveal_on_scroll %} scroldc-trigger animate--slide-in{% endif %}">
+		<div class="dc-tabs__header dc-tabs__header--{{ section.settings.tab_name_style }} flex items-center">
+			{%- for block in section.blocks -%}
+				<button
+					class="dc-tabs__button button button--tertiary dc-tabs__button--{{ section.settings.tab_name_direction }} {{ section.settings.tab_title_size }}"
+					data-tab="{{ section.id }}-{{ block.id }}"
+					{{ block.shopify_attributes }}
+				>
+					{%- if block.settings.icon != blank -%}
+						{% liquid
+							assign icon = block.settings.icon
+							assign icon_width = block.settings.icon_width
+							assign sizes = icon_width | append: 'px'
+							assign icon_height = icon_width | divided_by: icon.aspect_ratio
+						%}
+						{{-
+							icon
+							| image_url: width: icon_width
+							| image_tag:
+								loading: 'lazy',
+								alt: icon.alt,
+								sizes: sizes,
+								class: 'motion-reduce',
+								width: icon_width,
+								height: icon_height
+						-}}
+					{%- endif -%}
+					{{ block.settings.title }}
+				</button>
+			{%- endfor -%}
+		</div>
+		<div class="dc-tabs__contents">
+			{%- for block in section.blocks -%}
+				<div
+					class="dc-tabs__content dc-rte--{{ section.settings.tab_content_size }} dc-tabs__content--{{ section.settings.anmiation }} rte{% unless forloop.first %} hidden{% endunless %}"
+					data-content="{{ section.id }}-{{ block.id }}"
+				>
+					{{ block.settings.row_content }}
+					{{ block.settings.textarea }}
+					{{ block.settings.page.content }}
+					{{ block.settings.liquid }}
+				</div>
+			{%- endfor -%}
+		</div>
+	</dc-tabs>
+</div>
+
+{% schema %}
+{
+	"name": "Tabs",
+	"class": "section",
+	"tag": "section",
+	"settings": [
+		{
+			"type": "header",
+			"content": "Layout"
+		},
+		{
+			"type": "range",
+			"id": "page_width",
+			"min": 600,
+			"max": 1600,
+			"step": 100,
+			"default": 1200,
+			"unit": "px",
+			"label": "t:settings_schema.layout.settings.page_width.label"
+		},
+		{
+			"type": "checkbox",
+			"id": "show_full_width",
+			"label": "Show full width",
+			"default": true
+		},
+		{
+			"type": "header",
+			"content": "Tab spacing"
+		},
+		{
+			"type": "range",
+			"id": "tab_name_gap",
+			"min": 0,
+			"max": 80,
+			"step": 2,
+			"default": 40,
+			"unit": "px",
+			"label": "Space between tab name"
+		},
+		{
+			"type": "range",
+			"id": "gap_header_content",
+			"min": 0,
+			"max": 80,
+			"step": 2,
+			"default": 24,
+			"unit": "px",
+			"label": "Spacing between header and content"
+		},
+		{
+			"type": "header",
+			"content": "Text size"
+		},
+		{
+			"type": "select",
+			"id": "tab_type",
+			"options": [
+				{
+					"value": "primary",
+					"label": "Primary"
+				},
+				{
+					"value": "secondary",
+					"label": "Secondary"
+				},
+				{
+					"value": "tertiary",
+					"label": "Tertiary"
+				}
+			],
+			"default": "primary",
+			"label": "Tab type"
+		},
+		{
+			"type": "select",
+			"id": "tab_title_size",
+			"options": [
+				{
+					"value": "h4",
+					"label": "S"
+				},
+				{
+					"value": "h3",
+					"label": "M"
+				},
+				{
+					"value": "h2",
+					"label": "L"
+				},
+				{
+					"value": "h1",
+					"label": "XL"
+				}
+			],
+			"default": "h3",
+			"label": "Tab title"
+		},
+		{
+			"type": "select",
+			"id": "tab_content_size",
+			"options": [
+				{
+					"value": "small",
+					"label": "S"
+				},
+				{
+					"value": "medium",
+					"label": "M"
+				},
+				{
+					"value": "large",
+					"label": "L"
+				}
+			],
+			"default": "medium",
+			"label": "Tab content"
+		},
+		{
+			"type": "header",
+			"content": "Colors"
+		},
+		{
+			"type": "color",
+			"id": "background_color",
+			"label": "Background Color",
+			"default": "#fff"
+		},
+		{
+			"type": "paragraph",
+			"content": "Normal state"
+		},
+		{
+			"type": "color",
+			"id": "tab_title_color",
+			"label": "Tab title",
+			"default": "#000"
+		},
+		{
+			"type": "color",
+			"id": "tab_title_bg",
+			"label": "Tab background",
+			"default": "#fff"
+		},
+		{
+			"type": "paragraph",
+			"content": "Active state"
+		},
+		{
+			"type": "color",
+			"id": "tab_title_active_color",
+			"label": "Tab title",
+			"default": "#000"
+		},
+		{
+			"type": "color",
+			"id": "tab_title_active_bg",
+			"label": "Tab background",
+			"default": "#000"
+		},
+		{
+			"type": "paragraph",
+			"content": "Content"
+		},
+		{
+			"type": "color",
+			"id": "tab_content_color",
+			"label": "Tab content",
+			"default": "#000"
+		},
+		{
+			"type": "color",
+			"id": "tab_content_link_color",
+			"label": "Tab content links",
+			"default": "#000"
+		},
+		{
+			"type": "header",
+			"content": "t:sections.all.padding.section_padding_heading"
+		},
+		{
+			"type": "range",
+			"id": "padding_top",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_top",
+			"default": 36
+		},
+		{
+			"type": "range",
+			"id": "padding_bottom",
+			"min": 0,
+			"max": 100,
+			"step": 4,
+			"unit": "px",
+			"label": "t:sections.all.padding.padding_bottom",
+			"default": 36
+		}
+	],
+	"blocks": [
+		{
+			"type": "tab",
+			"name": "Tab",
+			"settings": [
+				{
+					"type": "header",
+					"content": "Icon"
+				},
+				{
+					"type": "image_picker",
+					"id": "icon",
+					"label": "Icon",
+					"info": "View [Lucide](https:\/\/lucide.dev\/icons\/stethoscope) or [Tabler](https:\/\/tabler.io\/icons) to find your desired icon."
+				},
+				{
+					"type": "range",
+					"id": "icon_width",
+					"label": "Icon Width",
+					"min": 14,
+					"max": 60,
+					"step": 2,
+					"unit": "px",
+					"default": 24
+				},
+				{
+					"type": "header",
+					"content": "Content"
+				},
+				{
+					"type": "inline_richtext",
+					"id": "title",
+					"default": "Tab",
+					"label": "Name"
+				},
+				{
+					"type": "header",
+					"content": "Content",
+					"info": "You can use one of them or combine some of the content inputs. We suggest using Row content as a first priority."
+				},
+				{
+					"type": "richtext",
+					"id": "row_content",
+					"label": "t:sections.collapsible_content.blocks.collapsible_row.settings.row_content.label",
+					"default": "<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestiae quibusdam incidunt similique cum ut temporibus praesentium sint distinctio atque repudiandae? Dolores debitis, ullam excepturi voluptatem nulla sed molestiae doloremque. Vero, neque fugiat sint omnis nulla veniam quidem repellendus nihil quis?</p>"
+				},
+				{
+					"type": "paragraph",
+					"content": "Or"
+				},
+				{
+					"type": "textarea",
+					"id": "textarea",
+					"label": "Textarea"
+				},
+				{
+					"type": "paragraph",
+					"content": "Or"
+				},
+				{
+					"type": "page",
+					"id": "page",
+					"label": "t:sections.collapsible_content.blocks.collapsible_row.settings.page.label"
+				},
+				{
+					"type": "paragraph",
+					"content": "Or"
+				},
+				{
+					"type": "liquid",
+					"id": "liquid",
+					"label": "Liquid"
+				}
+			]
+		}
+	],
+	"presets": [
+		{
+			"name": "Tabs",
+			"blocks": [
+				{
+					"type": "tab"
+				},
+				{
+					"type": "tab"
+				},
+				{
+					"type": "tab"
+				},
+				{
+					"type": "tab"
+				}
+			]
+		}
+	]
+}
+{% endschema %}
